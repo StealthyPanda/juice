@@ -1,46 +1,27 @@
 from juice import *
+from math import sin, cos
 
-# nn = NeuralNetwork(
-#     name = 'Jarvis',
-#     layers=[
-#         Flatten(inputsize = (28, 28)),
-#         Layer(16, activation = actrelu),
-#         Layer(16, activation = actrelu),
-#         Layer(10, activation = actsigmoid)
-#     ]
-# )
+r = [1, 0.5, 0.7, 0.2, 1, 0.1, 1.5]
 
-# nn.compile()
+def arm(r, theta):
+    x, y = 0, 0
 
-# print(nn)
+    for each in range(len(r)):
+        x += (r[each] * cos(theta[each]))
+        y += (r[each] * sin(theta[each]))
+    
+    return (x, y)
 
-# v = np.ones((28, 28))
 
-# print(nn.predict(v))
+point = (1, 2)
+def j(w):
+    x, y = arm(r, w)
+    return pow( pow((x - point[0]), 2) + pow((y - point[1]), 2) , 0.5)
 
-# v = np.random.random(size = (4, 5))
-# print(v)
-# print(np.linalg.norm(v, axis = 0).reshape(1, 5))
+w0 = [0 for i in range(7)]
 
-# print(tuple([i for i in range(10)]))
+w0 = np.array(w0, dtype = np.float32)
 
-# tup = (1, 2, 5, 6, 4)
-
-# bruh = list(tup)
-
-# ex = [2, 5, 6]
-# re = [10, 11, 12, 13]
-
-# for each in range(len(bruh)):
-#     if bruh[each:each + len(ex)] == ex:
-#         bruh = bruh[: each] + re + bruh[each + len(ex):]
-
-# print(bruh)
-
-v = np.zeros(shape=(28, 28))
-
-f = Flatten((28, 28))
-
-newv = f * v
-
-print(newv.shape)
+w = gradientdescent(j, w0, delta = pow(10, -6), alpha = 0.01, maxiterations=pow(10, 5), sequential=True)
+print(w, w0)
+print(arm(r, w))

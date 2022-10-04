@@ -1,4 +1,6 @@
+from turtle import pos
 from typing import List, Callable, Tuple
+from cv2 import threshold
 import numpy as np
 from math import exp, tanh, e
 
@@ -198,4 +200,37 @@ class NeuralNetwork:
         error = np.sum(error)/X.shape[0]
 
         return error
+
+
+def gradientdescent(
+
+    j : Callable[[np.ndarray], float],
+    w : np.ndarray,
+    delta : float = pow(10, -5),
+    alpha : float = pow(10, -2),
+    maxiterations : int = pow(10, 3),
+    thresh : float = pow(10, -5),
+    sequential : bool = False
+
+) -> np.ndarray:
+
+    w = w.copy()
+
+    for i in range(maxiterations):
+        if not sequential: grad = np.zeros(shape = w.shape, dtype = w.dtype)
+        jori = j(w)
+
+        with np.nditer(w, op_flags = ['readwrite'], flags = ['multi_index']) as array:
+            for x in array:
+                if sequential : jori = j(w)
+                position = array.multi_index
+                wplusdelta = w.copy()
+                wplusdelta[position] += delta
+                if not sequential : grad[position] = (alpha * ((jori - j(wplusdelta))/(delta)))
+                else : w[position] += (alpha * ((jori - j(wplusdelta))/(delta)))
+        
+        if not sequential and np.argmax(grad) < thresh: return (w + grad)
+
+        if not sequential : w = w + grad
     
+    return w
