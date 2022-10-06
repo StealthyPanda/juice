@@ -4,7 +4,6 @@ from cv2 import threshold
 import numpy as np
 from math import exp, tanh, e
 
-
 alpha = 0.5
 
 actnone =  np.vectorize(lambda x: x)
@@ -215,6 +214,7 @@ def gradientdescent(
 ) -> np.ndarray:
 
     w = w.copy()
+    W_getting_updated=[]
 
     for i in range(maxiterations):
         if not sequential: grad = np.zeros(shape = w.shape, dtype = w.dtype)
@@ -229,6 +229,7 @@ def gradientdescent(
                 if not sequential : grad[position] = (alpha * ((jori - j(wplusdelta))/(delta)))
                 else : w[position] += (alpha * ((jori - j(wplusdelta))/(delta)))
         
+        yield w
         if not sequential and np.argmax(grad) < thresh: return (w + grad)
 
         if not sequential : w = w + grad
