@@ -209,13 +209,17 @@ def gradientdescent(
     maxiterations : int = pow(10, 3),
     thresh : float = pow(10, -5),
     sequential : bool = False,
-    record : bool = False
+    record : bool = False,
+    dynamic : bool = False
 
 ) -> np.ndarray:
 
     w = w.copy()
 
     if record : timeline = []
+
+    if dynamic:
+        prev = w.copy()
 
     for i in range(maxiterations):
         if not sequential: grad = np.zeros(shape = w.shape, dtype = w.dtype)
@@ -236,6 +240,10 @@ def gradientdescent(
         if not sequential and np.argmax(grad) < thresh: return (w + grad)
 
         if not sequential : w = w + grad
+
+        if dynamic:
+            diff = np.linalg.norm(w - prev)
+            alpha = (diff)
     
     if record : return (w, timeline)
     return w

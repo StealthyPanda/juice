@@ -1,7 +1,8 @@
 from juice import *
 from math import sin, cos
+from random import randint, random
 
-r = [1, 2, 3, 0.5]
+r = [(random()) for i in range(20)]
 
 def arm(r, theta):
     x, y = 0, 0
@@ -12,17 +13,26 @@ def arm(r, theta):
     
     return (x, y)
 
+def mod(x): return x if x >= 0 else -x
 
-point = (0, 0)
+point = (-5, -5)
+
 def j(w):
     x, y = arm(r, w)
-    return (pow( pow((x - point[0]), 2) + pow((y - point[1]), 2) , 0.5) * np.linalg.norm(w))
+    return (pow( pow((x - point[0]), 2) + pow((y - point[1]), 2) , 0.5) + (np.linalg.norm(w)/len(w)))
 
-w0 = [-3 for i in range(len(r))]
+w0 = [((1 - (i/5))) for i in range(len(r))]
 
 w0 = np.array(w0, dtype = np.float32)
 
-w, record = gradientdescent(j, w0, delta = pow(10, -6), alpha = 0.001, maxiterations=pow(10, 4), sequential=True, record = True)
+w, record = gradientdescent(
+    j, w0,
+    delta = pow(10, -6),
+    alpha = 0.01,
+    maxiterations=pow(10, 4),
+    sequential=True,
+    record = True,
+)
 print(w, w0)
 print(arm(r, w))
 
@@ -32,7 +42,7 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize = (10, 10))
 ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))
 ax.plot([point[0]], [point[1]], 'ro')
-line, = ax.plot([], [], 'bo-', lw = 3,) 
+line, = ax.plot([], [], 'bo-', lw = 3, alpha = 0.4) 
 
 def init(): 
     line.set_data([], [])
