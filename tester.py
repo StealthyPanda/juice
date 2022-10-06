@@ -16,7 +16,7 @@ def arm(r, theta):
 point = (1, 2)
 def j(w):
     x, y = arm(r, w)
-    return pow( pow((x - point[0]), 2) + pow((y - point[1]), 2) , 0.5)
+    return (pow( pow((x - point[0]), 2) + pow((y - point[1]), 2) , 0.5) + np.linalg.norm(w))
 
 w0 = [0 for i in range(7)]
 
