@@ -1,14 +1,20 @@
 from juice import *
+import numpy as np
+import tensorflow as tf
 
+(trainx, trainy), (testx, testy) = tf.keras.datasets.mnist.load_data()
 
-
-quad = lambda x: x[0]**2
-
-x0 = np.array([9], dtype= np.float32)
-
-print(quad(x0))
-
-x = gradientdescent(
-    quad, x0, alpha=0.5, maxiterations=pow(10, 6)
+jarvis = NeuralNetwork(
+    layers = [
+        Flatten(inputsize = (28, 28)),
+        Layer(cells = 16, activation = actrelu),
+        Layer(cells = 16, activation = actrelu),
+        Layer(cells = 10, activation = actsigmoid)
+    ],
+    name = 'Jarvis'
 )
-print(x)
+
+print(jarvis.compile())
+
+bruh = jarvis.train(trainx, trainy)
+print(len(bruh))

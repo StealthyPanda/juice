@@ -1,6 +1,7 @@
 from typing import List, Callable, Tuple
 import numpy as np
 from math import exp, tanh, e
+import random
 
 
 alpha = 0.5
@@ -58,6 +59,7 @@ class Layer:
         self.cells = cells
         if inputsize is not None: self.array = self.default((cells, inputsize + 1))
         self.activation = activation
+        self.trainable = True
     
     def __mul__(self, other : np.ndarray) -> np.ndarray:
         assert self.inputsize is not None, "Layer hasn't been assigned input size yet!"
@@ -76,6 +78,7 @@ class Flatten:
         self.name = 'Flatten Layer'
         self.inputsize = inputsize
         self.activation = actnone
+        self.trainable = False
 
         self.cells = 1
 
@@ -96,6 +99,21 @@ class Flatten:
         return other.reshape(newshape).transpose()
 
 index = 0
+
+
+#note this shuffles the data on the first axis, that is if dataset is of shape (200, 28, 28, 3) then it assumes there
+#are 200 28x28x3 volumes that need to be shuffled
+def shuffle(data : np.ndarray) -> np.ndarray:
+    shuffled = data.copy()
+
+    indices = list(range(data.shape[0]))
+
+    random.shuffle(indices)
+
+    for each in range(data.shape[0]):
+        shuffled[each] = data[indices[each]]
+
+    return shuffled
 
 class NeuralNetwork:
 
@@ -187,6 +205,35 @@ class NeuralNetwork:
             delta = delta * gdashz
 
             self.deltas[each] = delta
+    
+    def train(self, x : np.ndarray, y : np.ndarray, alpha : float = pow(10, -2), batchsize : int = 100) -> None:
+        x = x.copy()
+        y = y.copy()
+
+        batches = []
+
+        for each in range((x.shape[0] // batchsize)):
+            batches.append(x[each * batchsize : (each + 1) * batchsize])
+        
+        if ((x.shape[0] // batchsize) != (x.shape[0] / batchsize)) : batches.append(x[(x.shape[0] // batchsize) * batchsize :])
+
+        # return batches
+
+        for batchindex in range(len(batches)):
+            batch = batches[batchindex]
+
+            layeroutputs = []
+
+            vector = batch
+
+            for layer in self.layers:
+                try:print(layer.name, layer.array.shape, vector.shape)
+                except:pass
+                vector = layer * vector
+                layeroutputs.append(vector)
+
+            return layeroutputs
+
     
     def cost(self, X : np.ndarray, Y : np.ndarray) -> float:
         yhat = self.predict(X)
