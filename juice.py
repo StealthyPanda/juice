@@ -210,29 +210,46 @@ class NeuralNetwork:
         x = x.copy()
         y = y.copy()
 
+        assert x.shape[0] == y.shape[0], f"Dimensions of data are wonky! Number of data points is the is number in dimension 0 of x and y numpy shapes;\nx.shape : {x.shape}, y.shape : {y.shape}"
+
+        # data = np.concatenate((x, y), axis=0)
+
         batches = []
 
         for each in range((x.shape[0] // batchsize)):
-            batches.append(x[each * batchsize : (each + 1) * batchsize])
+            batches.append((
+                x[each * batchsize : (each + 1) * batchsize],
+                y[each * batchsize : (each + 1) * batchsize]
+            ))
         
-        if ((x.shape[0] // batchsize) != (x.shape[0] / batchsize)) : batches.append(x[(x.shape[0] // batchsize) * batchsize :])
+        if ((x.shape[0] // batchsize) != (x.shape[0] / batchsize)):
+            batches.append((
+                x[(x.shape[0] // batchsize) * batchsize :],
+                y[(y.shape[0] // batchsize) * batchsize :]
+            ))
 
         # return batches
 
         for batchindex in range(len(batches)):
-            batch = batches[batchindex]
-
             layeroutputs = []
 
-            vector = batch
+            vector, target = batches[batchindex]
+
+            target = target.transpose()
 
             for layer in self.layers:
-                try:print(layer.name, layer.array.shape, vector.shape)
-                except:pass
+                # print(layer.name, layer.array.shape if layer.trainable else None, vector.shape)
                 vector = layer * vector
                 layeroutputs.append(vector)
+            
+            layerdels = [target - layeroutputs[-1]]
 
-            return layeroutputs
+            for layerindex in range(len(self.layers) - 1, 0, -1):
+                layer = self.layers[layerindex]
+
+                print(layer.name, layer.array.shape if layer.trainable else None)
+
+            return layerdels
 
     
     def cost(self, X : np.ndarray, Y : np.ndarray) -> float:
