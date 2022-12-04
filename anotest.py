@@ -1,12 +1,17 @@
 from juice import *
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import pickle
 
-(trainx, trainy), (testx, testy) = tf.keras.datasets.mnist.load_data()
+with open('mnistdatasetpickle', 'rb') as file:
+    (trainx, trainy), (testx, testy) = pickle.load(file)
 
 newtrainy = np.zeros(shape = (60000, 10))
 for each in range(60000):
     newtrainy[each][trainy[each]] = 1
+
+trainx /= 255.0
+print(trainx.max(), trainx.avg())
 
 # print(newtrainy[:2])
 
@@ -23,6 +28,7 @@ jarvis = NeuralNetwork(
 print(jarvis.compile())
 
 bruh = jarvis.train(trainx, newtrainy)
-print(len(bruh))
-for each in bruh:
-    print(each.shape)
+# print(len(bruh))
+# for each in bruh:
+#     print(each.shape)
+#     # print(each)

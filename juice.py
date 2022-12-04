@@ -206,7 +206,7 @@ class NeuralNetwork:
 
             self.deltas[each] = delta
     
-    def train(self, x : np.ndarray, y : np.ndarray, alpha : float = pow(10, -2), batchsize : int = 100) -> None:
+    def train(self, x : np.ndarray, y : np.ndarray, alpha : float = pow(10, -2), batchsize : int = 100, verbose : bool = True) -> None:
         x = x.copy()
         y = y.copy()
 
@@ -230,26 +230,53 @@ class NeuralNetwork:
 
         # return batches
 
-        for batchindex in range(len(batches)):
+        for batchindex in range(0, 1):
+            print(f"Now dealing with batch no. {batchindex}")
             layeroutputs = []
 
             vector, target = batches[batchindex]
 
             target = target.transpose()
 
-            for layer in self.layers:
-                # print(layer.name, layer.array.shape if layer.trainable else None, vector.shape)
-                vector = layer * vector
-                layeroutputs.append(vector)
+            try:
+                for layer in self.layers:
+                    # print(layer.name, layer.array.shape if layer.trainable else None, vector.shape)
+                    vector = layer * vector
+                    vector = layer.activation(vector)
+                    layeroutputs.append(vector)
+            except OverflowError:
+                print('\n\n\n')
+                print('Problem:')
+                print(f'\n{vector.shape}')
+                print(vector)
             
+            # print("here\n", target, '\n', layeroutputs[-1])
             layerdels = [target - layeroutputs[-1]]
 
-            for layerindex in range(len(self.layers) - 1, 0, -1):
+            for layerindex in range(len(self.layers) - 1, -1, -1):
                 layer = self.layers[layerindex]
+                if layer.trainable:
+                    layeroutput = layeroutputs[layerindex]
+                    prevlayeroutput = np.concatenate((layeroutputs[layerindex - 1], np.ones(shape=(1,batchsize))), axis = 0)
+                    currentdel = layerdels[-1]
 
-                print(layer.name, layer.array.shape if layer.trainable else None)
+                    prevlayerdel = np.matmul(layer.array.transpose(), currentdel)
 
-            return layerdels
+                    layergrad = np.matmul(currentdel, prevlayeroutput.transpose())
+                    if verbose:
+                        if layerindex == 3: print(layergrad.shape,'\n',layergrad)
+                    layer.array += (layergrad * alpha)
+
+                    prevlayerdel = prevlayerdel[:-1]
+
+                    layerdels.append(prevlayerdel)
+
+
+                    if verbose:
+                        print(f"Layer Index : {layerindex} prevlayeroutput shape = {prevlayeroutput.shape} currentdel shape = {currentdel.shape}\nlayergrad shape = {layergrad.shape} prevlayerdel = {prevlayerdel.shape}")
+                        print(layer.name, layer.array.shape,'\n')
+
+        return self
 
     
     def cost(self, X : np.ndarray, Y : np.ndarray) -> float:
